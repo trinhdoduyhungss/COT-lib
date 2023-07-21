@@ -33,5 +33,5 @@ data["output"] = ""
 
 print(data.head())
 
-# save data to csv file
+# save data_old to csv file
 data.to_csv('/home/hungtdd/Desktop/CoT-lib/datasets/VND/dictionary.csv', index=False)

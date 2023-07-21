@@ -1,6 +1,12 @@
 import re
 from urllib.parse import unquote
 
+from crawls.tools.constants import (
+    REGEX_REMOVE_ADS,
+    REGEX_TEXT_REMOVE,
+    REGEX_COMMAND_REMOVE
+)
+
 VN_abbreviation = {"M.City", "V.I.P", "PGS.Ts", "MRS.", "Mrs.", "Man.United", "Mr.", "SHB.ĐN", "Gs.Bs", "U.S.A",
                    "TMN.CSG", "Kts.Ts", "R.Madrid", "Tp.", "T.Ư", "D.C", "Gs.Tskh", "PGS.KTS", "GS.BS", "KTS.TS",
                    "PGS-TS", "Co.", "S.H.E", "Ths.Bs", "T&T.HN", "MR.", "Ms.", "T.T.P", "TT.", "TP.", "ĐH.QGHN",
@@ -16,6 +22,28 @@ VN_exception = {"Wi-fi", "17+", "km/h", "M7", "M8", "21+", "G3", "M9", "G4", "km
 
 
 class StringUtils:
+
+    @staticmethod
+    def clean_text(text):
+        """
+        Clean text
+
+        Args:
+            text (str): text to clean
+
+        Returns:
+            str: cleaned text
+        """
+        text = StringUtils.normalize_res(text)
+        ads = re.search(REGEX_REMOVE_ADS, text, re.DOTALL | re.IGNORECASE)
+        if ads:
+            text = text[:ads.start()] + text[ads.end():]
+        text = re.sub(REGEX_REMOVE_ADS, '', text, re.DOTALL | re.IGNORECASE)
+        text = re.sub(REGEX_TEXT_REMOVE, '', text, re.MULTILINE | re.IGNORECASE)
+        text = re.sub(REGEX_COMMAND_REMOVE, '', text, re.MULTILINE | re.IGNORECASE | re.DOTALL)
+        text = text.strip(' ')
+        return text
+
     @staticmethod
     def has_punctuation(s):
         for i in range(len(s)):

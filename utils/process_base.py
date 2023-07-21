@@ -1,10 +1,10 @@
 """
 This file contains the base class for pre-processing datasets.
-It will support for loading and saving the data and some functions:
-- load_data: load the data from the raw data
-- save_data: save the data to the processed data
-- convert_to_text: convert the data to text
-- break_text_to_df: break the text to data frame
+It will support for loading and saving the data_old and some functions:
+- load_data: load the data_old from the raw data_old
+- save_data: save the data_old to the processed data_old
+- convert_to_text: convert the data_old to text
+- break_text_to_df: break the text to data_old frame
 """
 import os
 import re
@@ -44,10 +44,10 @@ class ProcessBase:
 
     def setup(self, data_dir: Union[List, Text], output_dir: Text):
         """
-        Set up the data directory and the output directory.
+        Set up the data_old directory and the output directory.
 
         Args:
-            data_dir (Text): the data directory
+            data_dir (Text): the data_old directory
             output_dir (Text): the output directory
         """
         self.data_dir = data_dir
@@ -55,28 +55,28 @@ class ProcessBase:
 
     def load_data(self):
         """
-        Load the data from the raw data.
+        Load the data_old from the raw data_old.
         """
         raise NotImplementedError
 
     def analyze_data(self):
         """
-        Analyze the data.
+        Analyze the data_old.
 
-        - Average length of the data.
-        - Source of the data.
-        - Type of the data.
+        - Average length of the data_old.
+        - Source of the data_old.
+        - Type of the data_old.
         """
-        print("Analyzing the data ...")
+        print("Analyzing the data_old ...")
         data = self.data
         data["length"] = data[COLUMN_NAMES[0]].apply(lambda x: len(x)) + data[COLUMN_NAMES[1]].apply(lambda x: len(x))
         data["length"].hist(bins=100)
         plt.savefig(os.path.join(self.output_dir, "distribution_length.png"))
         plt.close()
-        data["source"].value_counts().plot(kind="pie", autopct="%.2f%%", title="Source of the data", y="")
+        data["source"].value_counts().plot(kind="pie", autopct="%.2f%%", title="Source of the data_old", y="")
         plt.savefig(os.path.join(self.output_dir, "distribution_source.png"))
         plt.close()
-        data["type"].value_counts().plot(kind="pie", autopct="%.2f%%", title="Type of the data", y="")
+        data["type"].value_counts().plot(kind="pie", autopct="%.2f%%", title="Type of the data_old", y="")
         plt.savefig(os.path.join(self.output_dir, "distribution_type.png"))
         plt.close()
         data = data.drop(columns=["length", "source", "type"])
@@ -84,12 +84,12 @@ class ProcessBase:
 
     def save_data(self):
         """
-        Save the data to the processed data as the parquet file.
+        Save the data_old to the processed data_old as the parquet file.
         """
         self.data = self.data.drop_duplicates()
         self.analyze_data()
         no_data = len(self.data)
-        print(f"Saving {no_data} data to {self.output_dir} ...")
+        print(f"Saving {no_data} data_old to {self.output_dir} ...")
         for column in COLUMN_ADD:
             self.data[column] = COLUMN_ADD[column]
         filename = f"data_{time.strftime('%Y%m%d-%H%M%S')}_{no_data}"
@@ -102,13 +102,13 @@ class ProcessBase:
 
     def _load_json(self, json_file):
         """
-        Load the data from the JSON file.
+        Load the data_old from the JSON file.
 
         Args:
             json_file (Text): the JSON file
 
         Returns:
-            pd.DataFrame: the data frame
+            pd.DataFrame: the data_old frame
         """
         try:
             data = json.load(open(json_file, "r", encoding="utf-8-sig"))
@@ -152,13 +152,13 @@ class ProcessBase:
 
     def _load_txt(self, file: str):
         """
-        Load the data from the TXT file.
+        Load the data_old from the TXT file.
 
         Args:
             file (str): the path to the TXT file
 
         Returns:
-            pd.DataFrame: the data frame of the data
+            pd.DataFrame: the data_old frame of the data_old
         """
         with open(file, "r", encoding="utf-8") as f:
             text = f.read()
@@ -187,27 +187,27 @@ class ProcessBase:
 
     def convert_to_text(self, data_frame: pd.DataFrame) -> pd.DataFrame:
         """
-        Convert format of the cell in data (data_frame) to text.
+        Convert format of the cell in data_old (data_frame) to text.
 
         Args:
-            data_frame (pd.DataFrame): the data frame to convert
+            data_frame (pd.DataFrame): the data_old frame to convert
 
         Returns:
-            pd.DataFrame: the converted data frame
+            pd.DataFrame: the converted data_old frame
         """
         data_frame = data_frame.applymap(self._convert_cell_to_text)
         return data_frame
 
     def break_text_to_df(self, column_names: List[Text], text: Text) -> pd.DataFrame:
         """
-        Break the text to data frame.
+        Break the text to data_old frame.
 
         Args:
             column_names (List[Text]): the column names will be separated from the text
             text (Text): the text to break
 
         Returns:
-            pd.DataFrame: the data frame
+            pd.DataFrame: the data_old frame
         """
         for regex in REGEX_BREAK_TEXT:
             parse = re.split(regex, text, re.MULTILINE | re.IGNORECASE)

@@ -3,7 +3,7 @@ REGEX_BREAK_LINE = r"\n\s*" #r"[\n]+\s"
 REGEX_BREAK_BLOCK = r"(?=Câu \d+)"
 REGEX_REMOVE_ADS = r"(Dành cho).*?(miễn phí)"
 REGEX_CUT_ANSWER = r'(Chứng minh|Lời giải|Hướng dẫn trả lời|Chứng minh|Giải thích|Trả lời|Bài giải|Kết quả|Giải chi tiết|Bài làm).*?[:]'
-REGEX_COMMAND_REMOVE = r'(Hãy|Mời|Nêu|Vui lòng|Xem thêm|Xin|Làm ơn|Please|Cảm ơn|Tra cứu|Thanks|Tạm biệt|Goodbye).*?[.?!:]'
+REGEX_COMMAND_REMOVE = r'(Nếu bạn có nhu cầu đặt lịch|Trên đây|Hãy|Mời|Nêu|Vui lòng|Xem thêm|Xin|Làm ơn|Please|Cảm ơn|Tra cứu|Thanks|Tạm biệt|Goodbye).*?[.?!:]'
 TAG_PARENT_EXTRACT = ['div', 'main', 'article', 'section']
 TEXT_POST_REMOVE = [
     'Đề bài',
@@ -32,6 +32,7 @@ TEXT_REMOVE = [
     'Xem lời giải',
     'Lấy lại mật khẩu',
     'Đăng nhập',
+    'Link tải và đăng ký ứng dụng:',
     'Đăng ký',
     'Đăng xuất',
     'Nhập Email',
@@ -53,7 +54,11 @@ TEXT_REMOVE = [
     'Lời giải của Tự Học 365',
     'GIÚP MÌNH NHANH NHÉ',
     'Xem bình luận',
-    'Sửa đổi'
+    'Sửa đổi',
+    'LIÊN HỆ TƯ VẤN',
+    'Không thể bỏ lỡ',
+    'CÂU TRẢ LỜI',
+    'Nên xem ứng dụng Aihealth chi tiết:'
 ]
 
 REGEX_TEXT_REMOVE = "|".join(TEXT_REMOVE)
@@ -61,6 +66,7 @@ REGEX_TEXT_REMOVE = "|".join(TEXT_REMOVE)
 REGEX_TEXT_POST_REMOVE = "|".join(TEXT_POST_REMOVE)
 
 TAG_REMOVE = [
+    'cite',
     'blockquote',
     'script',
     'style',
@@ -78,12 +84,19 @@ TAG_REMOVE = [
     'link',
     'table',
     'canvas',
-    'a',
     'aside',
-    'figure'
+    'figure',
+    'ul'
 ]
 
 CLASS_REMOVE = [
+    'branchs',
+    'mce-toc',
+    'news-comment',
+    'page-temp',
+    'news-involve',
+    'td-post-sub-title',
+    'reflist references-column-width',
     'color-orange font-roboto-b',
     'form-add-question',
     'section-footer',
@@ -150,6 +163,9 @@ CLASS_REMOVE = [
     'sidebar',
     'meta-post',
     'navbar-brand',
+    'navbox',
+    'plainlinks',
+    'mw-normal-catlinks',
     'counter-hierarchy',
     'wrapper has-toggler',
     'hidden-xs',
@@ -257,6 +273,7 @@ CLASS_REMOVE = [
 ]
 
 CLASS_PRIORITIZE = [
+    'uitleg',
     'mw-parser-output',
     'loigiai',
     'answer',
@@ -289,4 +306,12 @@ USERAGENT_LIST = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0',
     'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/114.0',
     'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.0.0',
+]
+
+SITE_BLOCKED = [
+    "simonhoadalat.com",
+    "hotcourses.vn",
+    "tudienso.com",
+    "dictionary.cambridge.org",
+    "tenkhaisinh.com"
 ]

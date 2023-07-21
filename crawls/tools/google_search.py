@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from typing import Any, Dict, Optional, List
 
 from crawls.tools.req_agents import CrawlUrl
+from crawls.tools.constants import SITE_BLOCKED
 from crawls.tools.vn_text_processor import StringUtils
 
 
@@ -12,14 +13,10 @@ class Google:
         """Initialize Google search engine."""
         self.req_agent = CrawlUrl()
 
-    def query(self, q: str) -> Optional[Dict[str, Any]]:
+    async def query(self, q: str) -> Optional[Dict[str, Any]]:
         """Search for a query using Google search.
 
         Args:
-            key: Your Google API key.
-            cx: Your Search Engine ID.
-            hl: Set the user interface language.
-            num: Number of search results to return.
             q: your query that you want to search.
 
         Returns:
@@ -27,7 +24,7 @@ class Google:
         """
         params = {
             "q": q,
-            "num": 1,
+            "num": 2,
             "hl": "vi"
         }
         start = 0
@@ -37,9 +34,13 @@ class Google:
             crawl_params = params.copy()
             crawl_params["start"] = start
             crawl_params["num"] = params["num"] - start
-            resp = self.req_agent.crawl_url("https://www.google.com/search", crawl_params)
-            soup = BeautifulSoup(resp.text, "html.parser")
-            result_block = soup.find_all("div", attrs={"class": "g"})
+            resp = await self.req_agent.gettext("https://www.google.com/search", crawl_params)
+            class_block = "g"
+            if "ezO2md" in resp:
+                # print("second block")
+                class_block = "AS66f"
+            soup = BeautifulSoup(resp, "html.parser")
+            result_block = soup.find_all("div", attrs={"class": class_block})
             if len(result_block) == 0:
                 start += 1
             for result in result_block:
@@ -50,24 +51,38 @@ class Google:
                     link_value = link["href"]
                     if link_value.startswith("/search?num="):
                         continue
+                    if link_value.startswith("/url?"):
+                        if "url=" in link_value:
+                            link_value = link_value.split("url=")[1]
+                        if "q=" in link_value:
+                            link_value = link_value.split("q=")[1]
+                    link_value = link_value.split("&")[0]
+                    if [site for site in SITE_BLOCKED if site in link_value]:
+                        continue
                     item_result["link"] = link_value
                 title = result.find("h3")
                 if title:
                     item_result["title"] = title.text
-                description_box = result.find("div", {"style": "-webkit-line-clamp:2"})
+                if class_block == "g":
+                    description_box = result.find("div", {"style": "-webkit-line-clamp:2"})
+                else:
+                    description_box = result.find("span", {"class": "fYyStc"})
                 if description_box:
                     item_result["snippet"] = description_box.text
                 google_results.append(item_result)
                 start += 1
             sleep(delay)
-        return {"items": google_results}
+        if google_results:
+            return {"items": [google_results[0]]}
+        return {"items": []}
 
-    def search_engine_results(self, response_data: Optional[Dict[str, Any]]
+    @staticmethod
+    def search_engine_results(response_data: Optional[Dict[str, Any]]
                               ) -> Optional[List[Dict[str, str]]]:  # noqa: E501
-        """Extract title, link and snippet data from the response.
+        """Extract title, link and snippet data_old from the response.
 
         Args:
-            response_data: Response data from Google search engine.
+            response_data: Response data_old from Google search engine.
 
         Returns:
             A dict contains "title", "url" and "snippet" or None.
@@ -79,8 +94,10 @@ class Google:
         # items variable has type list of dict (list[dict[str, Any]])
         if items := response_data.get("items", False):
             for item in items:
-                title: str = item.get("title", "Not found")
                 url: str = item.get("link", "Not found")
+                if [site for site in SITE_BLOCKED if site in url]:
+                    continue
+                title: str = item.get("title", "Not found")
                 snippet: str = item.get("snippet", "Not found")
                 if snippet[0].isdigit():
                     if " — " in snippet:

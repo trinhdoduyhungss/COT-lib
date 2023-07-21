@@ -20,13 +20,13 @@ class ProcessData(ProcessBase):
 
     async def load_data(self):
         """
-        Load the data from the raw data.
-        We have two types of data need to load:
-        - The data from the JSON files
-        - The data from the TXT files
+        Load the data_old from the raw data_old.
+        We have two types of data_old need to load:
+        - The data_old from the JSON files
+        - The data_old from the TXT files
         """
         if isinstance(self.data_dir, list):
-            for data_dir in tqdm(self.data_dir, desc="Loading data"):
+            for data_dir in tqdm(self.data_dir, desc="Loading data_old"):
                 self.data_dir = data_dir
                 file_loaded = await self.load_data()
                 if isinstance(self.data, pd.DataFrame):
