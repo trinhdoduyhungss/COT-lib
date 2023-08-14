@@ -2,4 +2,5 @@ datasets/
 *.jsonl
 *.csv
 .idea/
+tools/cookies/
 __pycache__/
