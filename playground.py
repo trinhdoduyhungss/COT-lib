@@ -6,7 +6,7 @@ from tabulate import tabulate
 
 from tools.search import SearchEngine
 
-DATA_PATH = "D:/Projects/COT-lib/datasets/vnd.jsonl"
+DATA_PATH = "./datasets/vnd.jsonl"
 
 if DATA_PATH.endswith(".csv"):
     data = pd.read_csv(DATA_PATH, encoding="utf-8")
@@ -17,36 +17,36 @@ data = data.dropna(subset=["instruction"])
 data = data.reset_index(drop=True)
 data = data.drop_duplicates(subset=["instruction"])
 
-start_index = random.randint(2000, len(data) - 1000)
-end_index = start_index + 1000
+start_index = random.randint(5000, len(data) - 2000)
+end_index = start_index + 2000
 data = data.iloc[start_index:end_index]
 
 search_engine = SearchEngine(model_path='keepitreal/vietnamese-sbert',
                              prompt="""Hãy trả lời câu hỏi sau một cách đầy đủ và dễ hiểu nhất:""",
                              echo=False,
-                             dir_cookies="D:/Projects/COT-lib/tools/cookies",
+                             dir_cookies="./tools/cookies",
                              collection_name='search',
-                             threshold=0.35)
+                             use_bot=False,
+                             threshold=0.32)
 
 
 def save_result(data):
     if DATA_PATH.endswith(".csv"):
-        data.to_csv(DATA_PATH.replace(".csv", f"-filled-4.csv"), index=False, encoding="utf-8")
+        data.to_csv(DATA_PATH.replace(".csv", f"-filled-6.csv"), index=False, encoding="utf-8")
     elif DATA_PATH.endswith(".jsonl"):
-        data.to_json(DATA_PATH.replace(".jsonl", f"-filled-4.jsonl"),
+        data.to_json(DATA_PATH.replace(".jsonl", f"-filled-6.jsonl"),
                      orient="records", lines=True, force_ascii=False)
 
 
 def process_question(index, row):
     start_time = time.time()
-    print(f"\nQ:{row['instruction']}")
+    print(f"\nQ:{row['instruction']}\n")
     result_search = search_engine.search(row["instruction"])
     if result_search is None:
         cost_time = time.time() - start_time
         return index, "Không tìm thấy kết quả phù hợp", cost_time
     print("\n")
     print(tabulate(result_search, headers='keys', tablefmt='psql'))
-    # convert to list dict
     result_search = result_search.iloc[0]
     result_search = result_search.to_dict()
     cost_time = time.time() - start_time

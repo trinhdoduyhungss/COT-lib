@@ -63,7 +63,8 @@ class DBMS:
         result = clean_data(self.kwargs.get("pattern", None), result)
         return result
 
-    def _transform(self, data: pd.DataFrame) -> Dict:
+    @staticmethod
+    def _transform(data: pd.DataFrame) -> Dict:
         """
         Transform data into ChromaDB format
 
@@ -94,13 +95,15 @@ class DBMS:
         if 'distances' in data:
             data = data.drop(columns=['distances'])
         # remove duplicates ids
-        data = data.drop_duplicates()
+        data = data.drop_duplicates(["documents"])
         # add ids column from last index of collection to length of data
         data['ids'] = list(range(self.collection.count(), self.collection.count() + len(data)))
+
         # convert ids column to string
         data['ids'] = data['ids'].astype(str)
         # print last record
         # finding the column has the type of string
+
         column_4_embedding = None
         for col in data.columns:
             if isinstance(data[col][0], str):
@@ -220,6 +223,9 @@ class DBMS:
                     data = data.rename(columns={col: 'documents'})
                 elif isinstance(data[col][0], dict):
                     data = data.rename(columns={col: 'metadatas'})
+            if 'metadatas' not in data.columns:
+                data['metadatas'] = [{"source": ""}] * len(data)
             self.insert(data)
+            print(f'Load {self.collection.count()} data successfully')
         else:
             raise ValueError('Not found data in file')

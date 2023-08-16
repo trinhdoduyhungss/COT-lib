@@ -2,7 +2,7 @@ from typing import Text, Optional
 from EdgeGPT.EdgeUtils import Query, Cookie
 
 
-class Bot:
+class EdgeBot:
     """
     EdgeGPT Chatbot
 

@@ -2,7 +2,9 @@ import pandas as pd
 from typing import Text, Optional
 
 from tools.dbms import DBMS
-from tools.edge_gpt import Bot
+from tools.components.APIs.google import Google
+from tools.components.LLMs.edge_gpt import EdgeBot
+
 
 
 class SearchEngine:
@@ -10,16 +12,17 @@ class SearchEngine:
     Search question in existing data or ask bot to answer question
 
     Attributes:
-        bot (Bot): EdgeGPT Chatbot
+        bot (EdgeBot): EdgeGPT Chatbot
     """
 
     def __init__(self,
                  model_path: Text,
                  threshold: Optional[float] = 0.8,
                  collection_name: Optional[Text] = 'search',
+                 use_bot: Optional[bool] = True,
                  **kwargs):
         """
-        Search engine using ChromaDB and SentenceTransformer for semantic search and store data
+        Search question in existing data or ask bot to answer question
 
         Args:
             model_path: path to SentenceTransformer model
@@ -29,7 +32,9 @@ class SearchEngine:
         Return:
             None
         """
-        self.bot = Bot(**kwargs)
+        self.google = Google()
+        self.use_bot = use_bot
+        self.bot = EdgeBot(**kwargs)
         self.db = DBMS(model_path=model_path, threshold=threshold, collection_name=collection_name, **kwargs)
 
     def search_db(self, ques: Text) -> Optional[pd.DataFrame]:
@@ -42,10 +47,33 @@ class SearchEngine:
         Returns:
             dataframe of answer
         """
+        print("\nSearch DB")
         result = self.db.query(ques)
         return result
 
-    def ask_bot(self, ques: Text) -> pd.DataFrame:
+    def ask_google(self, ques: Text) -> Optional[pd.DataFrame]:
+        """
+        Search answer for question from Google
+
+        Args:
+            ques: question
+
+        Returns:
+            dataframe of answer
+        """
+        print("\nAsk Google")
+        result = self.google.ask(ques)
+        if result:
+            df = pd.DataFrame(result)
+            try:
+                df = self.db.insert(df)
+            except Exception as e:
+                print(e)
+                pass
+            return df
+        return None
+
+    def ask_bot(self, ques: Text) -> Optional[pd.DataFrame]:
         """
         Ask question to bot
 
@@ -55,7 +83,10 @@ class SearchEngine:
         Returns:
             answer
         """
+        print("\nAsk Bot")
         query = self.bot.ask(ques)
+        if query is None:
+            return None
         answer = query.output
         source = {"source": query.sources}
         df = pd.DataFrame({
@@ -65,8 +96,8 @@ class SearchEngine:
         try:
             df = self.db.insert(df)
         except Exception as e:
-            print(e)
-
+            # print(e)
+            pass
         return df
 
     def pipeline(self, ques: Text) -> Optional[pd.DataFrame]:
@@ -80,35 +111,18 @@ class SearchEngine:
             dataframe of answer
         """
         if self.db.collection.count() < 20:
-            return self.ask_bot(ques)
+            result = self.ask_google(ques)
+            if result is None and self.use_bot:
+                result = self.ask_bot(ques)
+            return result
         else:
             result = self.search_db(ques)
             if result is None:
-                return self.ask_bot(ques)
+                result = self.ask_google(ques)
+                if result is None and self.use_bot:
+                    result = self.ask_bot(ques)
             return result
 
     def search(self, ques: Text) -> Optional[pd.DataFrame]:
         data_found = self.pipeline(ques)
         return data_found
-
-
-# if __name__ == '__main__':
-#     import time
-#     from tabulate import tabulate
-#     search_engine = SearchEngine(model_path='keepitreal/vietnamese-sbert',
-#                                  prompt="""From the internet results, you should write a shortest answer with the rules:
-# - Focus to the main information for answering my question below
-# - No citation needed
-# - Make sure your answer must be cleaned, easy to read, and natural
-# My question:""",
-#                                  echo=True,
-#                                  collection_name='search',
-#                                  threshold=0.6)
-#     start_time = time.time()
-#     result_search = search_engine.search("a-tua-đờ-rôn có nghĩa là gì")
-#     if result_search is not None:
-#         # result_search = result_search.drop(columns=['embeddings', 'ids'])
-#         print(tabulate(result_search, headers='keys', tablefmt='psql'))
-#     else:
-#         print("No result!")
-#     print(f"Time: {time.time() - start_time}s")

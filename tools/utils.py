@@ -3,18 +3,22 @@ import itertools
 from typing import List, Optional, Tuple, Text
 
 
-def replace_by_rule(rule: Tuple[Text, Text], text: Text) -> Text:
+def replace_by_rule(rules: List[Tuple[Text, Text]], text: Text) -> Text:
     """
     Replace text by rule
 
     Args:
-        rule: regex rule
+        rules: regex rule
         text: text to remove
 
     Returns:
         text after remove
     """
-    return re.sub(rule[0], rule[1], text, flags=re.MULTILINE | re.DOTALL)
+    for rule in rules:
+        text = re.sub(rule[0], rule[1], text, flags=re.MULTILINE | re.DOTALL | re.IGNORECASE)
+        text = text.strip(' ')
+        text = text.capitalize()
+    return text
 
 
 def clean_data(rules: Optional[List], data):
@@ -26,9 +30,14 @@ def clean_data(rules: Optional[List], data):
         data: dataframe
     """
     rules = rules if rules else []
-    rules = [('\[\^\d+\^]', ''), (':\[.*', ''), ('\\n\\n.*', ''), ('Searching.*', '')] + rules
-    for rule in rules:
-        data['documents'] = data['documents'].apply(lambda x: replace_by_rule(rule, x))
+    rules = [(r'\[\^\d+\^]', ''),
+             (r'< p>.*', ''),
+             (r':\[.*', ''),
+             (r'\\n\\n.*', ''),
+             (r'Searching.*', ''),
+             (r'(từ tương tự|hành chính|tham khảo|lịch sử|khái quát).*sửa đổi', ''),
+             (r'Tra cứu.*?\.', '')] + rules
+    data['documents'] = data['documents'].apply(lambda x: replace_by_rule(rules, x))
     return data
 
 
@@ -44,10 +53,11 @@ def flatten_list(data):
 
     def flatten_dict(data):
         for key, value in data.items():
-            if isinstance(value, list) and len(value) > 0 and isinstance(value[0], list) and isinstance(value[0][0], int):
+            if isinstance(value, list) and len(value) > 0 and isinstance(value[0], list) and not isinstance(value[0][0], int):
                 try:
                     data[key] = list(itertools.chain.from_iterable(value))
-                except:
+                except Exception as e:
+                    print(e)
                     continue
         return data
 

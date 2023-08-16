@@ -6,8 +6,8 @@ db = DBMS(
     threshold=0.35
 )
 
-db.load_json('D:/Projects/COT-lib/datasets/vnd_cleaned.jsonl', cols=["output"])
+db.load_json('./datasets/vnd_cleaned.jsonl', cols=["output"])
 
-db.auto_clean()
-
-db.visualize()
+if __name__ == '__main__':
+    db.auto_clean()
+    db.visualize()
