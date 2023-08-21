@@ -23,7 +23,7 @@ Follow the steps below to use this tool:
 5. Copy that file to the "cookies" folder and give it a name with format: "bing_cookie_{anything you want to write}.json".
 6. Run the command below to start the tool:
 ```
-python playground.py
+python trial/playground.py
 ```
 7. Rollback the Chat tab and type something to the bot. Then wait a minute for verification. And do step 4 to 5 again.
 8. After the verification, the bot will start answering your question. You can stop the tool by pressing Ctrl + C.
@@ -34,7 +34,7 @@ python playground.py
 - You also can edit the prompt to make the bot answer more accurately.
 - If you need to clean (not clear) the vectordb, remove some sub-pattern in the document, please run the command below:
 ```
-python clean_database.py
+python processing/clean_database.py
 ```
 
 ## Contact

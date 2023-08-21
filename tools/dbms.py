@@ -1,4 +1,5 @@
 import os
+import re
 import torch
 import chromadb
 import pandas as pd
@@ -40,7 +41,7 @@ class DBMS:
         self.collection = self.db.get_or_create_collection(self.collection_name, metadata={"hnsw:space": "cosine"})
         self.kwargs = kwargs
 
-    def query(self, ques: Text) -> Optional[pd.DataFrame]:
+    def query(self, ques: Text, **kwargs) -> Optional[pd.DataFrame]:
         """
         Search answer for question from collection
 
@@ -51,13 +52,16 @@ class DBMS:
             dataframe of answer
         """
         input_em = self.model.encode([ques]).tolist()
+        threshold = kwargs.get("threshold", self.threshold)
         result = self.collection.query(
             query_embeddings=input_em,
             include=self.kwargs.get("include", ["documents", "metadatas", "embeddings", "distances"]),
+            n_results=self.kwargs.get("limit", 10)
         )
         result = flatten_list(result)
+        result["distances"] = result["distances"][0][:len(result["ids"])]
         result = pd.DataFrame(result)
-        result = result[result['distances'] < self.threshold]
+        result = result[result['distances'] < threshold]
         if result.empty:
             return None
         result = clean_data(self.kwargs.get("pattern", None), result)
@@ -185,18 +189,43 @@ class DBMS:
         data = pd.DataFrame(data)
         data = clean_data(self.kwargs.get("pattern", None), data)
         # get ids where documents is duplicated or length of documents has length less than 3
-        data_remove = data.groupby('documents').filter(lambda x: len(x) > 1 or len(x['documents'].iloc[0]) < 3)
+        data = data.drop_duplicates(["documents"])
+        data_remove = data[data['documents'].str.len() < 3]
         data_remove = data_remove['ids'].tolist()
+        print("Remove {} records".format(len(data_remove)))
         # only keep records that does not exist in data_remove
         data = data[~data['ids'].isin(data_remove)]
         # update embeddings
         data["embeddings"] = self.model.encode(data["documents"]).tolist()
+        data["documents"] = data["documents"].apply(lambda x: re.sub(r"^.*#\s+", "", x))
         self.update(data)
         # remove data
         if len(data_remove) > 0:
             self.delete(data_remove)
 
-    def load_json(self, path: Text, cols: List = None):
+    def from_pandas(self, data: pd.DataFrame):
+        """
+        Insert data from pandas dataframe
+
+        Args:
+            data: dataframe of data
+
+        Returns:
+            None
+        """
+        data = data.dropna()
+        data = data.drop_duplicates()
+        if "documents" not in data.columns:
+            for col in data.columns:
+                if isinstance(data[col][0], str):
+                    data = data.rename(columns={col: 'documents'})
+                elif isinstance(data[col][0], dict):
+                    data = data.rename(columns={col: 'metadatas'})
+        if 'metadatas' not in data.columns:
+            data['metadatas'] = [{"source": ""}] * len(data)
+        self.insert(data)
+
+    def from_json(self, path: Text, cols: List = None, **kwargs):
         """
         Read data from json file
 
@@ -205,27 +234,22 @@ class DBMS:
             cols: list of columns to read
 
         Returns:
-            dataframe of data
+            None
         """
-        # check if file is jsonl or json
-        data = None
-        if path.endswith('.jsonl'):
-            data = pd.read_json(path, lines=True, encoding='utf-8')
-        else:
-            data = pd.read_json(path, encoding='utf-8')
+        data = pd.read_json(path,
+                            lines=True if path.endswith('.jsonl') else False,
+                            encoding='utf-8')
 
         if not data.empty:
+            if kwargs.get("merge_columns"):
+                columns_to_merge = kwargs.get("merge_columns")
+                target = columns_to_merge[-1]
+                columns_to_merge = columns_to_merge[:-1]
+                for col in columns_to_merge:
+                    data[target] = data[col] + " # " + data[target]
             data = data[cols] if cols else data
-            data = data.dropna()
-            data = data.drop_duplicates()
-            for col in data.columns:
-                if isinstance(data[col][0], str):
-                    data = data.rename(columns={col: 'documents'})
-                elif isinstance(data[col][0], dict):
-                    data = data.rename(columns={col: 'metadatas'})
-            if 'metadatas' not in data.columns:
-                data['metadatas'] = [{"source": ""}] * len(data)
-            self.insert(data)
+            print(data.head())
+            self.from_pandas(data)
             print(f'Load {self.collection.count()} data successfully')
         else:
             raise ValueError('Not found data in file')

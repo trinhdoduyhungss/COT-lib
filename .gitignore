@@ -3,4 +3,5 @@ datasets/
 *.csv
 .idea/
 tools/cookies/
+tools/data/
 __pycache__/

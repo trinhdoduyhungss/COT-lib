@@ -6,7 +6,6 @@ from tools.components.APIs.google import Google
 from tools.components.LLMs.edge_gpt import EdgeBot
 
 
-
 class SearchEngine:
     """
     Search question in existing data or ask bot to answer question

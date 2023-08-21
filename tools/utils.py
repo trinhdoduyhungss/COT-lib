@@ -17,7 +17,6 @@ def replace_by_rule(rules: List[Tuple[Text, Text]], text: Text) -> Text:
     for rule in rules:
         text = re.sub(rule[0], rule[1], text, flags=re.MULTILINE | re.DOTALL | re.IGNORECASE)
         text = text.strip(' ')
-        text = text.capitalize()
     return text
 
 
@@ -53,7 +52,7 @@ def flatten_list(data):
 
     def flatten_dict(data):
         for key, value in data.items():
-            if isinstance(value, list) and len(value) > 0 and isinstance(value[0], list) and not isinstance(value[0][0], int):
+            if isinstance(value, list) and len(value) > 0 and isinstance(value[0], list) and not isinstance(value[0][0], int) and not isinstance(value[0][0], float):
                 try:
                     data[key] = list(itertools.chain.from_iterable(value))
                 except Exception as e:

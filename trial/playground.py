@@ -6,7 +6,7 @@ from tabulate import tabulate
 
 from tools.search import SearchEngine
 
-DATA_PATH = "./datasets/vnd.jsonl"
+DATA_PATH = "../datasets/vnd.jsonl"
 
 if DATA_PATH.endswith(".csv"):
     data = pd.read_csv(DATA_PATH, encoding="utf-8")
@@ -17,14 +17,14 @@ data = data.dropna(subset=["instruction"])
 data = data.reset_index(drop=True)
 data = data.drop_duplicates(subset=["instruction"])
 
-start_index = random.randint(5000, len(data) - 2000)
-end_index = start_index + 2000
+start_index = random.randint(8000, len(data) - 2000)
+end_index = start_index + 4000
 data = data.iloc[start_index:end_index]
 
 search_engine = SearchEngine(model_path='keepitreal/vietnamese-sbert',
                              prompt="""Hãy trả lời câu hỏi sau một cách đầy đủ và dễ hiểu nhất:""",
                              echo=False,
-                             dir_cookies="./tools/cookies",
+                             dir_cookies="../tools/cookies",
                              collection_name='search',
                              use_bot=False,
                              threshold=0.32)
@@ -32,9 +32,9 @@ search_engine = SearchEngine(model_path='keepitreal/vietnamese-sbert',
 
 def save_result(data):
     if DATA_PATH.endswith(".csv"):
-        data.to_csv(DATA_PATH.replace(".csv", f"-filled-6.csv"), index=False, encoding="utf-8")
+        data.to_csv(DATA_PATH.replace(".csv", f"-filled-1.csv"), index=False, encoding="utf-8")
     elif DATA_PATH.endswith(".jsonl"):
-        data.to_json(DATA_PATH.replace(".jsonl", f"-filled-6.jsonl"),
+        data.to_json(DATA_PATH.replace(".jsonl", f"-filled-1.jsonl"),
                      orient="records", lines=True, force_ascii=False)
 
 
