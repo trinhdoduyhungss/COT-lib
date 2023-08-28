@@ -5,3 +5,4 @@ datasets/
 tools/cookies/
 tools/data/
 __pycache__/
+.env

@@ -1,12 +1,11 @@
 import time
 import random
 from bs4 import BeautifulSoup
-from requests import get, Response
+from typing import Any, Text, Union
 from fake_useragent import UserAgent
-from typing import Any, Dict, Text, Union, Optional
+from requests import get, Response, request
 
 from .constants import USERAGENT_LIST
-
 
 class CrawlUrl:
     def __init__(self):
@@ -19,7 +18,7 @@ class CrawlUrl:
             "Referer": "https://www.google.com",
         }
         self.proxies = None
-        self.timeout = 5
+        self.timeout = 50
         self._update_proxy()
 
     def _crawl_proxy(self):
@@ -63,13 +62,12 @@ class CrawlUrl:
         """
         self._crawl_proxy()
 
-    async def crawl_url(self, url: Text, params: Optional[Dict]) -> Union[Any, Response]:
+    async def crawl_url(self, url: Text, **kwargs) -> Union[Any, Response]:
         """
         Crawl url
 
         Args:
             url (str): url
-            params (dict): params
 
         Returns:
             requests.Response
@@ -77,48 +75,38 @@ class CrawlUrl:
         proxy = None
         if self.proxies:
             proxy = {"http": random.choice(self.proxies)}
-        header = self.headers
+        header = kwargs.get("headers", self.headers)
         header["User-Agent"] = random.choice([random.choice(USERAGENT_LIST), self.ua.random])
-        if params:
-            resp = get(
-                url=url,
-                headers=header,
-                params=params,
-                proxies=proxy,
-                timeout=self.timeout,
-            )
-        elif not proxy:
-            resp = get(
-                url=url,
-                headers=header,
-                proxies=proxy,
-                timeout=self.timeout,
-            )
-        else:
-            resp = get(
-                url=url,
-                headers=header,
-                timeout=self.timeout,
-            )
+        timeout = kwargs.get("timeout", self.timeout)
+        method = kwargs.get("method", "get")
+        resp = request(
+            method=method,
+            url=url,
+            headers=header,
+            params=kwargs.get("params", None),
+            data=kwargs.get("data", None),
+            proxies=proxy if proxy else None,
+            timeout=timeout,
+            json=kwargs.get("json", None),
+        )
         if resp.status_code == 429:
             self._update_proxy()
-            return self.crawl_url(url, params)
+            return self.crawl_url(url, **kwargs)
         resp.raise_for_status()
         return resp
 
-    async def gettext(self, url: Text, params: Optional[Dict]) -> Union[str, dict]:
+    async def gettext(self, url: Text, **kwargs) -> Union[str, dict]:
         """
         Get text from url
 
         Args:
             url (str): url
-            params (dict): params
 
         Returns:
             str: text from url
             json: json from url
         """
-        resp = await self.crawl_url(url, params)
+        resp = await self.crawl_url(url, **kwargs)
         if resp and resp.headers.get("Content-Type") == "application/json":
             return resp.json()
         return resp.text

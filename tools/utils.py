@@ -52,7 +52,7 @@ def flatten_list(data):
 
     def flatten_dict(data):
         for key, value in data.items():
-            if isinstance(value, list) and len(value) > 0 and isinstance(value[0], list) and not isinstance(value[0][0], int) and not isinstance(value[0][0], float):
+            if isinstance(value, list) and len(value) > 0 and isinstance(value[0], list) and not isinstance(value[0][0], int) and not isinstance(value[0][0], float) and not isinstance(value[0][0], float):
                 try:
                     data[key] = list(itertools.chain.from_iterable(value))
                 except Exception as e:
@@ -66,3 +66,12 @@ def flatten_list(data):
         return list(itertools.chain.from_iterable(data))
     else:
         return data
+
+def clean_bot_answer(text):
+    # text = re.sub(r"^.*:", "", text)
+    # text = re.sub(r"^.*!", "", text)
+    # text = re.sub(r"\(.*\)", "", text)
+    # text = re.sub(r"^- ", "", text)
+    text = re.sub(r"^Xin chào.*! ", "", text)
+    text = re.sub(r"^Rất vui.*\.", "", text)
+    return text

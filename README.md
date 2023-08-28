@@ -4,7 +4,7 @@
 This is a tool to answer anything you want to answer via BingAI, Google search with OpenAI. You can use it for building Chain-Of-Thought dataset to fine-tune your model.
 
 ## Requirement
-First, please make sure you have Python version 3.6 or above installed.
+First, please make sure you have Python version 3.6 or above (< 3.11) installed.
 And install Cookie extension [1.11.0](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm)
 into your Browser (Recommend Edge).
 

@@ -6,8 +6,8 @@ db = DBMS(
     threshold=0.35
 )
 
-db.from_json('./datasets/vnd_cleaned.jsonl', cols=["output"], merge_columns=["instruction", "output"])
+# db.from_json('./datasets/vnd_cleaned.jsonl', cols=["output"], merge_columns=["instruction", "output"])
 
 if __name__ == '__main__':
-    db.auto_clean()
+    # db.auto_clean()
     db.visualize()

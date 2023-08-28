@@ -1,6 +1,10 @@
-import g4f
-from g4f.models import ModelUtils
+import os
+import openai
+from dotenv import load_dotenv
 from typing import Text, Union, List
+load_dotenv()
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 class OpenAIBot:
     """
@@ -25,40 +29,35 @@ class OpenAIBot:
             "role": "user",
             "content": "hi"
         }
-        self._setup()
+        print("You are using OpenAIBot with model: {}".format(self.model))
 
-    def _setup(self):
-        if self.model in ModelUtils.convert:
-            self.model = ModelUtils.convert[self.model]
-            self.provider = self.model.best_provider
-        else:
-            raise Exception(f'The model: {self.model} does not exist')
-
-    @property
-    def params(self):
-        if self.provider is not None:
-            return self.provider.params
-        else:
-            return None
-
-    def ask(self, question: Text) -> Union[Text, List[Text]]:
+    def ask(self, question: Text, **kwargs) -> Union[Text, List[Text]]:
         """
         Ask a question to the bot.
 
         Args:
             question (Text): Question to ask.
-            des (Text): Description of the question.
 
         Returns:
             Union[Text, List[Text]]: Response from the bot.
         """
         question = question.replace('"', '\"')
-        question = self.prompt.format(question)
+        prompt = kwargs.get("prompt", self.prompt)
+        if kwargs.get("highlights"):
+            build_highlight = ""
+            for highlight in range(len(kwargs.get("highlights"))):
+                if highlight == len(kwargs.get("highlights")) - 1:
+                    build_highlight += "and " + kwargs.get("highlights")[highlight]
+                else:
+                    build_highlight += kwargs.get("highlights")[highlight] + ", "
+            print(build_highlight)
+            prompt = prompt.replace("###", build_highlight)
+        question = prompt.replace("{}", question)
+        print(question)
         form = self.form.copy()
         form["content"] = str(question)
-        response = g4f.ChatCompletion.create(model=self.model, provider=self.provider,
-                                             messages=[form],
-                                             **self.kwargs)
+        response = openai.ChatCompletion.create(model=self.model, messages=[form], **self.kwargs)
+        response = response.choices[0].message.content
         if not isinstance(response, str):
             full_text = ""
             for text in response:

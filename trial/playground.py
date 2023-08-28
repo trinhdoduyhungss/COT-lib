@@ -6,7 +6,7 @@ from tabulate import tabulate
 
 from tools.search import SearchEngine
 
-DATA_PATH = "../datasets/vnd.jsonl"
+DATA_PATH = "D:/Projects/COT-lib/datasets/vnd.jsonl"
 
 if DATA_PATH.endswith(".csv"):
     data = pd.read_csv(DATA_PATH, encoding="utf-8")
@@ -17,17 +17,17 @@ data = data.dropna(subset=["instruction"])
 data = data.reset_index(drop=True)
 data = data.drop_duplicates(subset=["instruction"])
 
-start_index = random.randint(8000, len(data) - 2000)
+start_index = random.randint(18000, len(data) - 2000)
 end_index = start_index + 4000
 data = data.iloc[start_index:end_index]
 
-search_engine = SearchEngine(model_path='keepitreal/vietnamese-sbert',
+search_engine = SearchEngine(model_path='sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2',
                              prompt="""Hãy trả lời câu hỏi sau một cách đầy đủ và dễ hiểu nhất:""",
                              echo=False,
-                             dir_cookies="../tools/cookies",
+                             dir_cookies="D:/Projects/COT-lib/tools/cookies",
                              collection_name='search',
-                             use_bot=False,
-                             threshold=0.32)
+                             use_bot=True,
+                             threshold=0.2)
 
 
 def save_result(data):
