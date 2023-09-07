@@ -19,7 +19,6 @@ P/S: Please use Conda for creating virtual environment and installing packages i
 -------------------------
 **I. Crawl data from BingAI**
 
--------------------------
 Follow the steps below to use this tool:
 1. Open your browser and login to your Bing account.
 2. Go to [Bing](https://www.bing.com/) and search for anything you want to answer.
@@ -34,7 +33,7 @@ python trial/playground.py
 8. After the verification, the bot will start answering your question. You can stop the tool by pressing Ctrl + C.
 9. After the crawling process, you can see a tab for visualizing the vectordb (all result will be saved in the "data" folder).
 
-### Note
+#### Note
 - The bot has a limit of 1000 answers per day. So please use it wisely. However, if you have the same question, you can query it in the vectordb without using the bot and I also implemented, you just need to call the "search" function of the "SearchEngine" class.
 - You also can edit the prompt to make the bot answer more accurately.
 - If you need to clean (not clear) the vectordb, remove some sub-pattern in the document, please run the command below:
@@ -45,10 +44,9 @@ python processing/clean_database.py
 -------------------------
 **II. Crawl data from ChatGPT**
 
--------------------------
 No need custom anything, just call the class OpenGPTBot as you see in the "rewrite.py" file.
 
-### Note
+#### Note
 - **NOT** official ChatGPT, just a tool to crawl data from ChatGPT.
 - **NOT** always work or response slowly, please use it wisely.
 
