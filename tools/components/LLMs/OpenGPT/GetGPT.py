@@ -1,6 +1,7 @@
 import os
 import json
 import uuid
+import time
 from Crypto.Cipher import AES
 
 from tools.components.LLMs.OpenGPT.BaseProvider import BaseProvider
@@ -21,14 +22,13 @@ class GetGPT(BaseProvider):
     ) -> CreateResult:
         headers = {
             "Content-Type": "application/json",
-            "Referer": "https://chat.getgpt.world/",
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+            "Referer": "https://chat.getgpt.world/"
         }
         data = json.dumps(
             {
                 "messages": messages,
                 "frequency_penalty": kwargs.get("frequency_penalty", 0),
-                "max_tokens": kwargs.get("max_tokens", 4000),
+                "max_tokens": kwargs.get("max_tokens", 1024),
                 "model": "gpt-3.5-turbo",
                 "presence_penalty": kwargs.get("presence_penalty", 0),
                 "temperature": kwargs.get("temperature", 1),
@@ -49,28 +49,10 @@ class GetGPT(BaseProvider):
         if res is None:
             return None
 
-        print(res)
-
         for line in res.iter_lines():
             if b"content" in line:
                 line_json = json.loads(line.decode("utf-8").split("data: ")[1])
                 yield line_json["choices"][0]["delta"]["content"]
-
-    @classmethod
-    @property
-    def params(cls):
-        params = [
-            ("model", "str"),
-            ("messages", "list[dict[str, str]]"),
-            ("stream", "bool"),
-            ("temperature", "float"),
-            ("presence_penalty", "int"),
-            ("frequency_penalty", "int"),
-            ("top_p", "int"),
-            ("max_tokens", "int"),
-        ]
-        param = ", ".join([": ".join(p) for p in params])
-        return f"{cls.__name__} supports: ({param})"
 
     def _encrypt(self, e: str):
         t = os.urandom(8).hex().encode("utf-8")

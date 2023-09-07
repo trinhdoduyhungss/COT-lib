@@ -1,7 +1,12 @@
+import ftfy
 from typing import Text, Union, List
 
 from tools.utils import clean_bot_answer
-from tools.components.LLMs.OpenGPT import GetGPT, OpChatGPT, ChatGPTLogin
+from tools.components.LLMs.OpenGPT import (GetGPT,
+                                           YqChatGPT,
+                                           OpChatGPT,
+                                           LoChatGPT,
+                                           OrChatGPT)
 
 class OpenGPTBot:
     """
@@ -12,7 +17,7 @@ class OpenGPTBot:
         """
         Initialize OpenAIBot
         """
-        self._list_provider = [GetGPT, OpChatGPT, ChatGPTLogin]
+        self._list_provider = [GetGPT, OpChatGPT, LoChatGPT, OrChatGPT, YqChatGPT]
         self._provider = None
         self._retry = len(self._list_provider)
         self.form = {
@@ -59,7 +64,6 @@ class OpenGPTBot:
                     res_bot = self._get_answer(engine, form, **kwargs)
                     if res_bot:
                         res = res_bot
-                        print("===> ", res)
                         self._provider = engine
                         self._retry = len(self._list_provider)
                         break
@@ -79,7 +83,8 @@ class OpenGPTBot:
                 self._retry -= 1
                 if self._retry > 0:
                     res = self.ask(question, **kwargs)
-        res = clean_bot_answer(res)
+        res = ftfy.fix_text(clean_bot_answer(res))
+        print("===> ", res)
         return res
 
 

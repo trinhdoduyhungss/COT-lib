@@ -39,7 +39,6 @@ class CrawlUrl:
                                                                                           'ru', 'gb',
                                                                                           'ca', 'au'])}/"""
             resp = get(url=url, headers=self.headers, timeout=self.timeout)
-            resp.raise_for_status()
             soup = BeautifulSoup(resp.text, "html.parser")
             table_proxies = soup.find("table", {"id": "tbl_proxy_list"})
             table_proxies = table_proxies.find("tbody").find_all("tr")
@@ -91,7 +90,7 @@ class CrawlUrl:
         )
         if resp.status_code == 429:
             self._update_proxy()
-            return self.crawl_url(url, **kwargs)
+            return await self.crawl_url(url, **kwargs)
         resp.raise_for_status()
         return resp
 

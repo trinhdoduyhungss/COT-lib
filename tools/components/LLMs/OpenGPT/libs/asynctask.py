@@ -12,3 +12,4 @@ class RunThread(threading.Thread):
 
     def run(self):
         self.result = asyncio.run(self.func(*self.args, **self.kwargs))
+        print(self.result)

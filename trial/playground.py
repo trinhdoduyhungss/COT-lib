@@ -8,6 +8,8 @@ from tools.search import SearchEngine
 
 DATA_PATH = "D:/Projects/COT-lib/datasets/vnd.jsonl"
 
+data = None
+
 if DATA_PATH.endswith(".csv"):
     data = pd.read_csv(DATA_PATH, encoding="utf-8")
 elif DATA_PATH.endswith(".jsonl"):
@@ -17,16 +19,16 @@ data = data.dropna(subset=["instruction"])
 data = data.reset_index(drop=True)
 data = data.drop_duplicates(subset=["instruction"])
 
-start_index = random.randint(18000, len(data) - 2000)
-end_index = start_index + 4000
+start_index = 28000#random.randint(18000, len(data) - 2000)
+end_index = start_index + 300
 data = data.iloc[start_index:end_index]
 
 search_engine = SearchEngine(model_path='sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2',
-                             prompt="""Hãy trả lời câu hỏi sau một cách đầy đủ và dễ hiểu nhất:""",
+                             prompt="""Hãy trả lời câu hỏi sau một cách đầy đủ và dễ hiểu nhất: """,
                              echo=False,
                              dir_cookies="D:/Projects/COT-lib/tools/cookies",
                              collection_name='search',
-                             use_bot=True,
+                             use_bot=False,
                              threshold=0.2)
 
 
@@ -78,7 +80,7 @@ def process_all_questions(data_sheet):
         except Exception as e:
             print(e)
             results.append((index, "Không tìm thấy kết quả phù hợp", 0))
-        if len(results) % 100 == 0:
+        if len(results) % 10 == 0:
             data_sheet = post_process_result(data_sheet, results)
             save_result(data_sheet)
 

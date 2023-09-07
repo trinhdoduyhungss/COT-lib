@@ -16,7 +16,6 @@ class BaseProvider(ABC):
     def __init__(self):
         self._req_agent = CrawlUrl()
         self._tasks = None
-        self._get_task()
 
     def _get_task(self):
         try:
@@ -26,7 +25,8 @@ class BaseProvider(ABC):
         self._tasks = loop
 
     def _add_task(self, task, *args, **kwargs):
-        if self._tasks and self._tasks.is_running():
+        print(self._tasks)
+        if self._tasks:
             thread = RunThread(task, args, kwargs)
             thread.start()
             thread.join()
@@ -37,6 +37,7 @@ class BaseProvider(ABC):
     def send_request(self, url, **kwargs):
         # add timeout to kwargs
         kwargs["timeout"] = 1000
+        self._get_task()
         return self._add_task(self._req_agent.crawl_url, url, **kwargs)
 
     @abstractmethod
@@ -58,4 +59,4 @@ class BaseProvider(ABC):
             ("stream", "bool"),
         ]
         param = ", ".join([": ".join(p) for p in params])
-        return f"g4f.provider.{cls.__name__} supports: ({param})"
+        return f"{cls.__name__} supports: ({param})"

@@ -73,5 +73,7 @@ def clean_bot_answer(text):
     # text = re.sub(r"\(.*\)", "", text)
     # text = re.sub(r"^- ", "", text)
     text = re.sub(r"^Xin chào.*! ", "", text)
+    text = re.sub(r"^Xin lỗi vì.*\. ", "", text)
     text = re.sub(r"^Rất vui.*\.", "", text)
+    text = re.sub(r". Rất xin lỗi cho.*\.", ".", text)
     return text

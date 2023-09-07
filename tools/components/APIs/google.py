@@ -183,7 +183,7 @@ class Google:
                 relate = fuzz.ratio(desc, ques)
             print("\nques:", ques, "desc:", desc, "relate:", relate)
             if relate > 28 and len(desc) > 25:
-                gpt_reponse = self.gpt.ask(ques+"? "+desc)
+                gpt_reponse = self.gpt.ask(question=ques+"? "+desc, prompt="Hãy diễn đạt lại văn bản sau thật tự nhiên, không chứa câu hỏi và đúng ngữ pháp tiếng Việt, hãy loại bỏ các từ viết tắc mà bạn không biết: {}")
                 print("gpt_reponse:", gpt_reponse)
                 if gpt_reponse and "Tôi xin lỗi" not in gpt_reponse and "Please visit" not in gpt_reponse:
                     desc = gpt_reponse
