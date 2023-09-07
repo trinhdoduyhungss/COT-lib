@@ -28,7 +28,7 @@ search_engine = SearchEngine(model_path='sentence-transformers/paraphrase-multil
                              echo=False,
                              dir_cookies="D:/Projects/COT-lib/tools/cookies",
                              collection_name='search',
-                             use_bot=False,
+                             use_bot=False, # True if you want to use BingAI
                              threshold=0.2)
 
 
