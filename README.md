@@ -16,7 +16,6 @@ P/S: Please use Conda for creating virtual environment and installing packages i
 
 ## Usage
 
--------------------------
 **I. Crawl data from BingAI**
 
 Follow the steps below to use this tool:
@@ -24,7 +23,7 @@ Follow the steps below to use this tool:
 2. Go to [Bing](https://www.bing.com/) and search for anything you want to answer.
 3. Open the Chat tab and wait for the bot to answer.
 4. Click on the Cookie extension icon and export the cookie to a file (JSON format).
-5. Copy that file to the "cookies" folder (inside the "tool" folder) and give it a name with format: "bing_cookie_{anything you want to write}.json".
+5. Copy that file to the "cookies" folder (inside the "tool" folder) and give it a name with format: "**bing_cookie_**{anything you want to write}.json".
 6. Run the command below to start the tool:
 ```
 python trial/playground.py
@@ -41,7 +40,6 @@ python trial/playground.py
 python processing/clean_database.py
 ```
 
--------------------------
 **II. Crawl data from ChatGPT**
 
 No need custom anything, just call the class OpenGPTBot as you see in the "rewrite.py" file.
